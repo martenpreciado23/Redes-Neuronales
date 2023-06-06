@@ -1,0 +1,127 @@
+---
+title: "Redes Neuronales"
+author: "Martin Eduardo Preciado Orozco"
+date: '2023-05-31'
+output:
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+---
+
+#### Matemáticas - Curso Propedeutico para Maestría en Ciencia de Datos
+
+### 1. Definición y ejemplos de Redes Neuronales
+
+De acuerdo a IBM, el término red neuronal se aplica a una familia de modelos relacionada de manera aproximada que se caracteriza por un gran espacio de parámetro y una estructura flexible y que proviene de los estudios sobre el funcionamiento del cerebro. Conforme fue creciendo la familia, se diseñó la mayoría de los nuevos modelos para aplicaciones no biológicas, aunque gran parte de la terminología asociada refleja su origen.
+
+Las definiciones específicas de redes neuronales son tan variadas como los campos en que se utilizan. Aunque ninguna definición única cubre correctamente toda la familia de modelos, por ahora, tenga en cuenta la siguiente descripción:
+
+Una red neuronal es un procesador distribuido en paralelo de forma masiva con una propensión natural a almacenar conocimiento experimental y convertirlo en disponible para su uso. Asemeja al cerebro en dos aspectos:
+
+-   El conocimiento se adquiere por la red mediante un proceso de aprendizaje.
+-   Las fuerzas de conexión interneuronal, conocidas como ponderaciones sinápticas, se utilizan para almacenar el conocimiento.
+
+Los principales **ejemplos**, o al menos los más conocidos, de la utilización práctica de las redes neuronales son:
+
+-   Sistemas de reconocimiento de voz como los empleados en los altavoces inteligentes o HomePod de Amazon, Google o Apple.
+-   Vehículos de conducción autónoma de Tesla y Uber.
+-   Los chatbots como Siri de Apple, Alexa de Amazon y Cortana de Microsoft.
+-   Sistemas de seguridad perimetral para la detección de intrusiones en tiempo real mediante el procesado de imagen captada por las cámaras de videovigilancia.
+
+### 2. Esquema general de las matemáticas que incluyen redes neuronales y flujo de trabajo
+
+Dependiendo del número de neuronas, nuestra red puede ser más o menos simple o profunda. La sinapsis entre neuronas, la transmisión de información, o el valor de salida de la neurona anterior se multiplica por un valor peso. Estos pesos en los enlaces pueden incrementar o inhibir el estado de activación de las siguientes neuronas. Del mismo modo, a la salida de la neurona, puede existir, un filtro, una función limitadora o umbral, que modifica el valor resultado o impone un límite que se debe sobrepasar para poder proseguir a otra neurona. Esta función se conoce como función de activación, la cual hablaremos en otro momento. Para el ajuste de dichos pesos hablaremos acerca del entrenamiento de la red neuronal, utilizando diversos métodos, como son descenso de gradiente o backpropagation.
+
+**Esquema de Neurona Artificial**
+
+![](images/Esquema%20de%20neurona.png)
+
+**Funciones de Activación**
+
+Una función de activación es una función que transmite la información generada por la combinación lineal de los pesos y las entradas, es decir son la manera de transmitir la información por las conexiones de salida.
+
+![](Figura-25-Funciones-de-Activacion-mas-utilizadas-para-las-redes-neuronales-artificiales.ppm)
+
+La red neuronal la podemos definir como un grafo, una capa de entradas que reciben la señal de entrada, la envían mediante estímulos a la siguiente capa oculta, la cual se encarga de procesar la información y transmitirla a la siguiente capa, así hasta que llegamos a la última capa, la capa de salida, la que nos transmite la respuesta.
+
+
+![](https://empresas.blogthinkbig.com/wp-content/uploads/2019/11/Screenshot-2019-11-25-at-14.41.56.png?resize=539%252C301)
+
+### 3. Tema de Interés 
+
+#### Optimización de la Cadena de Suministro
+
+Se utilizaran las redes neuronales para optimizar la gestión de inventario y la previsión de la demanda en la cadena de suministro de fabricación. El modelo aprendera de los datos históricos para predecir con precisión los patrones de demanda y asegurar las entregas oportunas.
+
+```{r}
+rm(list=ls())
+
+setwd("C:/Users/marti/Desktop/python_work/CSVs")
+
+Datos <- read.csv("People.csv", header = TRUE, sep = ",", dec = ".")
+head(Datos)
+
+Datos <- Datos[4:14]
+```
+
+### 4. Desarrollo matematico amplio y detallado
+
+Codificar datos
+```{r}
+Datos$Geography <- as.numeric(factor(Datos$Geography,
+                                      levels = c('France', 'Spain', 'Germany'),
+                                      labels = c(1, 2, 3)))
+Datos$Gender <- as.numeric(factor(Datos$Gender,
+                                   levels = c('Female', 'Male'),
+                                   labels = c(1, 2)))
+```
+
+Division de set de entrenamiento y de validacion y Feature Scaling
+```{r}
+library(caTools)
+set.seed(123)
+split <- sample.split(Datos$Exited, SplitRatio = 0.8)
+training_set <- subset(Datos, split == TRUE)
+test_set <- subset(Datos, split == FALSE)
+
+# Feature Scaling
+training_set[-11] <- scale(training_set[-11])
+test_set[-11] <- scale(test_set[-11])
+```
+
+Creacion del modelo
+```{r}
+library(h2o)
+h2o.init(nthreads = -1)
+model <- h2o.deeplearning(y = 'Exited',
+                         training_frame = as.h2o(training_set),
+                         activation = 'Rectifier',
+                         hidden = c(5,5),
+                         epochs = 100,
+                         train_samples_per_iteration = -2)
+```
+
+Resultados del modelo
+```{r}
+y_pred <- h2o.predict(model, newdata = as.h2o(test_set[-11]))
+y_pred <- (y_pred > 0.5)
+y_pred <- as.vector(y_pred)
+y_pred
+```
+
+Comparacion del modelo con la informacion veridica
+```{r}
+cm <- table(test_set[, 11], y_pred)
+cm
+```
+
+Bibliografia:
+
+- <https://www.ibm.com/docs/es/spss-statistics/29.0.0?topic=networks-what-is-neural-network> 
+- <https://www.unir.net/ingenieria/revista/redes-neuronales-artificiales/> 
+- <https://empresas.blogthinkbig.com/las-matematicas-del-machine-learning-redes-neuronales-parte-i/>
+
+
+
+
+
