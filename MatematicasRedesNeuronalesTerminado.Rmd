@@ -49,9 +49,9 @@ La red neuronal la podemos definir como un grafo, una capa de entradas que recib
 
 ### 3. Tema de Interés 
 
-#### Optimización de la Cadena de Suministro
+#### Predicciones de comportamiento en una tienda
 
-Se utilizaran las redes neuronales para optimizar la gestión de inventario y la previsión de la demanda en la cadena de suministro de fabricación. El modelo aprendera de los datos históricos para predecir con precisión los patrones de demanda y asegurar las entregas oportunas.
+Se utilizaran las redes neuronales para predecir el comportamiento de personas en una tienda a partir de algunas variables de las cuales se deducira si las personas siguen en la tienda o no.
 
 ```{r}
 rm(list=ls())
